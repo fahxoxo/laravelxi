@@ -167,3 +167,60 @@ Route::get('query/orm', function () {
 Route::get('barchart', function () {    
     return view('barchart');
 })->name('barchart');
+
+
+
+
+
+
+
+
+use App\Models\Product;
+
+Route::get('product-index', function () {
+    $products = Product::get();
+    return view('query-test', compact('products'));
+})->name("product.index");
+
+
+Route::get('product-form', function () {    
+    return view('product-form');
+})->name("product.form");
+
+
+Route::post('/product-submit', function (Request $request) {    
+    $data = $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'required|string',
+        'price' => 'required|numeric|min:0',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    ]);    
+
+    // ตรวจสอบว่ามีการอัปโหลดรูปภาพ
+    if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('uploads', 'public');
+        $url = Storage::url($imagePath);
+        $data["image"] =$url;
+    }
+
+    // บันทึกข้อมูลในฐานข้อมูล
+    Product::create($data);
+
+    return redirect()->route('product.index')->with('success', 'เพิ่มสินค้าแล้ว!');
+})->name('product.submit');
+
+
+
+
+
+
+
+
+
+Route::get('/comment-test', function () {
+    return view('comment-test');
+});
+
+Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+
+
